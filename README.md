@@ -1,6 +1,6 @@
-# Extract Data from PDFs using Form Recognizer
+# Extract Data from PDFs using Form Recognizer with Code or Without!
 
-Form recognizer is a powerful tool to help build a variety of document machine learning solutions.  It is one service however its made up of many prebuilt models that can perform a variety of essential document functions. You can even custom train a model using supervised or unsupervised learning for tasks outside of the scope of the prebuilt models! Read more about all the features of Form Recognizer here. In this example we will be looking at how to use one of the prebuilt models in the Form Recognizer service that can extract the data from a PDF document dataset. Our documents are invoices with common data fields so we are able to use the prebuilt model without using the labeling tool.
+Form recognizer is a powerful tool to help build a variety of document machine learning solutions.  It is one service however its made up of many prebuilt models that can perform a variety of essential document functions. You can even custom train a model using supervised or unsupervised learning for tasks outside of the scope of the prebuilt models! Read more about all the features of Form Recognizer [here](https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/overview?tabs=v2-1). In this example we will be looking at how to use one of the prebuilt models in the Form Recognizer service that can extract the data from a PDF document dataset. Our documents are invoices with common data fields so we are able to use the prebuilt model without having to build a customized model.
 
 Sample Invoice:
 ![img](/imgs/invoice.png)
@@ -20,86 +20,133 @@ Power Automate Flow:
 - Power Automate Account [Sign up here!](https://docs.microsoft.com/en-us/power-automate/sign-up-sign-in)
 - No programming knowledge
 
-## Python and Azure Form Recognizer Service
-First lets create the form recognizer cognitive service.
+## Process PDFs with Python and Azure Form Recognizer Service
+
+### Create Services
+First lets create the Form Recognizer Cognitive Service.
 -	Go to portal.azure.com to create the resource or click this [link](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesFormRecognizer).
 
 Now lets create a storage account to store the PDF dataset we will be using in containers. We want two containers, one for the `processed` PDFs and one for the `raw` unprocessed PDF.
 -	Create an [Azure Storage Account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal)
 - Create two containers: `processed`, `raw`
-- Upload your dataset to the Azure Storage `raw` folder since they need to be processed. Once processed then they would get moved to the `processed` container.
 
-## Post to the API with Python
+### Upload data
+Upload your dataset to the Azure Storage `raw` folder since they need to be processed. Once processed then they would get moved to the `processed` container.
 
-Now that we have our data stored we can connect and create our model using the python SDK for Form Recognizer. Here are the steps to process one document link
+The result should look something like this:
+
+![img](/imgs/storageaccounts.png)
+
+
+### Create Notebook and Install Packages
+Now that we have our data stored in Azure Blob Storage we can connect and process the PDF forms to extract the data using the Form Recognizer Python SDK.
+
+- Create a new [Jupyter notebook in VS Code](https://code.visualstudio.com/docs/python/jupyter-support#_create-or-open-a-jupyter-notebook).
 
 - Install the Python SDK
 ```python
 !pip install azure-ai-formrecognizer --pre
 ```
 
-- Import the packages
+- Then we need to import the packages.
 
 ```python
 import os
 from azure.core.exceptions import ResourceNotFoundError
 from azure.ai.formrecognizer import FormRecognizerClient
 from azure.core.credentials import AzureKeyCredential
+import os, uuid
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
 ```
-
-- connect to blob storage [docs on how to connect](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python)
-
-- Update the endpoint and key with the values
+### Create FormRecognizerClient
+- Update the `endpoint` and `key` with the values from the service you created. These values can be found in the Azure Portal under the Form Recongizer service you created under the `Keys and Endpoint` on the navigation menu.
 ```python 
 endpoint = "<your endpoint>"
 key = "<your key>"
 ```
 
-- Create the form recognizer client
+- We then use the `endpoint` and `key` to connect to the service and create the [FormRecongizerClient](https://docs.microsoft.com/en-us/python/api/azure-ai-formrecognizer/azure.ai.formrecognizer.aio.formrecognizerclient?view=azure-python)
 ```python
 form_recognizer_client = FormRecognizerClient(endpoint, AzureKeyCredential(key))
 ```
-
-- Get url to invoice
+- Create the `print_results` helper function for use later to print out the results of each invoice.
 ```python
-invoiceUrl = "https://storageaccount.blob.core.windows.net/train/Invoice.pdf"
-poller = form_recognizer_client.begin_recognize_invoices_from_url(invoiceUrl)
-invoices = poller.result()
+def print_result(invoices, blob_name):
+    for idx, invoice in enumerate(invoices):
+        print("--------Recognizing invoice {}--------".format(blob_name))
+        vendor_name = invoice.fields.get("VendorName")
+        if vendor_name:
+            print("Vendor Name: {} has confidence: {}".format(vendor_name.value, vendor_name.confidence))
+        vendor_address = invoice.fields.get("VendorAddress")
+        if vendor_address:
+            print("Vendor Address: {} has confidence: {}".format(vendor_address.value, vendor_address.confidence))
+        customer_name = invoice.fields.get("CustomerName")
+        if customer_name:
+            print("Customer Name: {} has confidence: {}".format(customer_name.value, customer_name.confidence))
+        customer_address = invoice.fields.get("CustomerAddress")
+        if customer_address:
+            print("Customer Address: {} has confidence: {}".format(customer_address.value, customer_address.confidence))
+        customer_address_recipient = invoice.fields.get("CustomerAddressRecipient")
+        if customer_address_recipient:
+            print("Customer Address Recipient: {} has confidence: {}".format(customer_address_recipient.value, customer_address_recipient.confidence))
+        invoice_id = invoice.fields.get("InvoiceId")
+        if invoice_id:
+            print("Invoice Id: {} has confidence: {}".format(invoice_id.value, invoice_id.confidence))
+        invoice_date = invoice.fields.get("InvoiceDate")
+        if invoice_date:
+            print("Invoice Date: {} has confidence: {}".format(invoice_date.value, invoice_date.confidence))
+        invoice_total = invoice.fields.get("InvoiceTotal")
+        if invoice_total:
+            print("Invoice Total: {} has confidence: {}".format(invoice_total.value, invoice_total.confidence))
+        due_date = invoice.fields.get("DueDate")
+        if due_date:
+            print("Due Date: {} has confidence: {}".format(due_date.value, due_date.confidence))
+
+```
+### Connect to Blob Storage
+
+- Now lets [connect to our blob storage containers](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python) and create the [BlobServiceClient](https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python). We will use the client to connect to the `raw` and `processed` containers that we created earlier.
+
+```python
+# Create the BlobServiceClient object which will be used to get the container_client
+connect_str = "<Get connection string from the Azure Portal>"
+blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+# Container client for raw container.
+raw_container_client = blob_service_client.get_container_client("raw")
+# Container client for processed container
+processed_container_client = blob_service_client.get_container_client("processed")
+# Get base url for container.
+invoiceUrlBase = raw_container_client.primary_endpoint
+print(invoiceUrlBase)
 ```
 
-- Iterate and print results:
-```python 
-for idx, invoice in enumerate(invoices):
-    print("--------Recognizing invoice #{}--------".format(idx+1))
-    vendor_name = invoice.fields.get("VendorName")
-    if vendor_name:
-        print("Vendor Name: {} has confidence: {}".format(vendor_name.value, vendor_name.confidence))
-    vendor_address = invoice.fields.get("VendorAddress")
-    if vendor_address:
-        print("Vendor Address: {} has confidence: {}".format(vendor_address.value, vendor_address.confidence))
-    customer_name = invoice.fields.get("CustomerName")
-    if customer_name:
-        print("Customer Name: {} has confidence: {}".format(customer_name.value, customer_name.confidence))
-    customer_address = invoice.fields.get("CustomerAddress")
-    if customer_address:
-        print("Customer Address: {} has confidence: {}".format(customer_address.value, customer_address.confidence))
-    customer_address_recipient = invoice.fields.get("CustomerAddressRecipient")
-    if customer_address_recipient:
-        print("Customer Address Recipient: {} has confidence: {}".format(customer_address_recipient.value, customer_address_recipient.confidence))
-    invoice_id = invoice.fields.get("InvoiceId")
-    if invoice_id:
-        print("Invoice Id: {} has confidence: {}".format(invoice_id.value, invoice_id.confidence))
-    invoice_date = invoice.fields.get("InvoiceDate")
-    if invoice_date:
-        print("Invoice Date: {} has confidence: {}".format(invoice_date.value, invoice_date.confidence))
-    invoice_total = invoice.fields.get("InvoiceTotal")
-    if invoice_total:
-        print("Invoice Total: {} has confidence: {}".format(invoice_total.value, invoice_total.confidence))
-    due_date = invoice.fields.get("DueDate")
-    if due_date:
-        print("Due Date: {} has confidence: {}".format(due_date.value, due_date.confidence))
+*HINT: If you get a "HttpResponseError: (InvalidImageURL) Image URL is badly formatted." error make sure the proper permissions to access the container are set. Learn more about Azure Storage Permissions [here](https://docs.microsoft.com/en-us/azure/storage/common/storage-auth)*
+
+
+### Extract Data from PDFs
+
+We are ready to process the blobs now! Here we will call `list_blobs` to get a list of blobs in the `raw` container. Then we will loop through each blob, call the `begin_recognize_invoices_from_url` to extract the data from the PDF. Then we have our helper method to print the results. Once we have extracted the data from the PDF we will `upload_blob` to the `processed` folder and `delete_blob` from the raw folder.
+
+```python
+print("\nProcessing blobs...")
+
+# List the blobs in the container
+blob_list = raw_container_client.list_blobs()
+for blob in blob_list:
+    invoiceUrl = f'{invoiceUrlBase}/{blob.name}'
+    print(invoiceUrl)
+    poller = form_recognizer_client.begin_recognize_invoices_from_url(invoiceUrl)
+    # Get results
+    invoices = poller.result()
+    # Print results
+    print_result(invoices, blob.name)
+    # Copy blob to processed
+    processed_container_client.upload_blob(blob, blob.blob_type,    overwrite=True)
+    # Delete blob from raw now that its processed
+    raw_container_client.delete_blob(blob)
 ```
-The results should look something like this for the invoice we are using:
+
+Each result should look similar to this for the above invoice example:
 
 ![img](/imgs/pythonresult.png)
 
