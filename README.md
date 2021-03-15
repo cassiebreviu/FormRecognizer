@@ -11,12 +11,12 @@ Power Automate Flow:
 
 ![img](/imgs/flowaibuild.png)
 
-## Prerequisites for Python
+### Prerequisites for Python
 -	Azure Account [Sign up here!](https://azure.microsoft.com/en-us/free/)
 -  Anaconda and/or VS Code
 -  Basic programming knowledge
 
-## Prerequisites for Power Automate
+### Prerequisites for Power Automate
 - Power Automate Account [Sign up here!](https://docs.microsoft.com/en-us/power-automate/sign-up-sign-in)
 - No programming knowledge
 
@@ -154,11 +154,64 @@ The prebuilt invoices model worked great for our invoices so we don't need to tr
 
 ## Use Form Recognizer with AI Build in Power Automate
 
-You can achieve these same results using no code with Form Recognizer in AI Builder with Power Automate.
+You can achieve these same results using no code with Form Recognizer in AI Builder with Power Automate. Lets take a look at how we can do that!
 
-New Form Recognizer Features
+### Create a New Flow
+- Log in to [Power Automate](https://flow.microsoft.com/)
+- Click `Create` then click `Instant Cloud Flow`. You can trigger Power Automate flows in a variety of ways so keep in mind that you may want to select a different trigger for you project.
+- Give the Flow a name and select the `Manually trigger a flow`.
 
-Additional resources
+### Connect to Blob Storage
+
+- Click `New Step`
+- `List blobs` Step
+    - Search for `Azure Blob Storage` and select `List blobs`
+    - Select the ellipsis click `Create new connection` if your storage account isnt already connected
+        - Fill in the `Connection Name`, `Azure Storage Account name` (the account you created), and the `Azure Storage Account Access Key` (which you can find in the resource keys in the Azure Portal)
+        - Then select `Create`
+    - Once the storage account is selected click the folder icon on the right of the list blobs options. You should see all the containers in the storage account, select `raw`.
+
+Your flow should look something like this:
+![img](/imgs/connecttoblob.png)
+
+### Loop Through Blobs to Extract the Data
+- Click the plus sign to create a new step
+- Click `Control` then `Apply to each`
+- Select the textbox and a list of blob properties will appear. Select the `value` property
+- Next select `add action` from within the `Apply to each` Flow step.
+- `Get blob content` Flow step
+    - Search for `Azure Blob Storage` and select `Get blob content`
+    - Click the textbox and select the `Path` property. This will get the `File content` that we will pass into the Form Recognizer.
+- `Process and save information from invoices` flow step
+    - Click the plus sign and then `add new action`
+    - Search for `Process and save information from invoices`
+    - Select the textbox and then the property `File Content` from the `Get blob content` section
+- `Copy Blob` Flow Step
+    - Repeat the add action steps
+    - Search for `Azure Blob Storage` and select `Copy Blob`
+    - Select the `Source url` text box and select the `Path` property
+    - Select the `Destination blob path` and put `/processed` for the processed container
+    - Select `Overwrite?` dropdown and select `Yes` if you want the copied blob to overwrite blobs with the existing name.
+- `Delete Blob` Flow Step
+    - Repeat the add action steps
+    - Search for `Azure Blob Storage` and select `Delete Blob`
+    - Select the `Blob` text box and select the `Path` property
+
+The `Apply to each` block should look something like this:
+![img](/imgs/applytoeachblock.png)
+
+- Save and Test the Flow
+Once you have completed creating the flow save and test it out using the built in test features that are part of power automate.
+
+This prebuilt model again worked great on our invoice data. However if you have a more complex dataset, use the AI Build to label and create a customized machine learning model for your specific dataset. Read more about how to do that [here]().
+
+## Conclusion
+
+We went over a fraction of the things that you can do with Form Recognizer so dont let the learning stop here! Check out the below highlights of new Form Recongizer features that were just announced and the additional doc links to dive deeper into what we did here!
+
+### New Form Recognizer Features
+
+### Additional resources
 Invoices - Form Recognizer - Azure Cognitive Services | Microsoft Docs
 Try your own invoices and samples in the Form Recognizer Sample UI.
 
