@@ -1,6 +1,6 @@
 # Extract Data from PDFs using Form Recognizer with Code or Without!
 
-Form recognizer is a powerful tool to help build a variety of document machine learning solutions.  It is one service however its made up of many prebuilt models that can perform a variety of essential document functions. You can even custom train a model using supervised or unsupervised learning for tasks outside of the scope of the prebuilt models! Read more about all the features of Form Recognizer [here](https://docs.microsoft.com/azure/cognitive-services/form-recognizer/overview?WT.mc_id=ca-14201-cassieb). In this example we will be looking at how to use one of the prebuilt models in the Form Recognizer service that can extract the data from a PDF document dataset. Our documents are invoices with common data fields so we are able to use the prebuilt model without having to build a customized model.
+Form recognizer is a powerful tool to help build a variety of document machine learning solutions.  It is one service however its made up of many prebuilt models that can perform a variety of essential document functions. You can even custom train a model using supervised or unsupervised learning for tasks outside of the scope of the prebuilt models! Read more about all the features of Form Recognizer [here](https://docs.microsoft.com/azure/cognitive-services/form-recognizer/overview?WT.mc_id=aiml-14201-cassieb). In this example we will be looking at how to use one of the prebuilt models in the Form Recognizer service that can extract the data from a PDF document dataset. Our documents are invoices with common data fields so we are able to use the prebuilt model without having to build a customized model.
 
 Sample Invoice:
 ![img](/imgs/invoice.png)
@@ -12,12 +12,12 @@ Power Automate Flow:
 ![img](/imgs/flowaibuild.png)
 
 ### Prerequisites for Python
--	Azure Account [Sign up here!](https://azure.microsoft.com/free/?WT.mc_id=ca-14201-cassieb)
+-	Azure Account [Sign up here!](https://azure.microsoft.com/free/?WT.mc_id=aiml-14201-cassieb)
 -  [Anaconda]() and/or [VS Code]()
 -  Basic programming knowledge
 
 ### Prerequisites for Power Automate
-- Power Automate Account [Sign up here!](https://docs.microsoft.com/power-automate/sign-up-sign-in/?WT.mc_id=ca-14201-cassieb)
+- Power Automate Account [Sign up here!](https://docs.microsoft.com/power-automate/sign-up-sign-in/?WT.mc_id=aiml-14201-cassieb)
 - No programming knowledge
 
 ## Process PDFs with Python and Azure Form Recognizer Service
@@ -27,7 +27,7 @@ First lets create the Form Recognizer Cognitive Service.
 -	Go to portal.azure.com to create the resource or click this [link](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesFormRecognizer).
 
 Now lets create a storage account to store the PDF dataset we will be using in containers. We want two containers, one for the `processed` PDFs and one for the `raw` unprocessed PDF.
--	Create an [Azure Storage Account](https://docs.microsoft.com/azure/storage/common/storage-account-create?WT.mc_id=ca-14201-cassieb)
+-	Create an [Azure Storage Account](https://docs.microsoft.com/azure/storage/common/storage-account-create?WT.mc_id=aiml-14201-cassieb)
 - Create two containers: `processed`, `raw`
 
 ### Upload data
@@ -41,7 +41,7 @@ The result should look something like this:
 ### Create Notebook and Install Packages
 Now that we have our data stored in Azure Blob Storage we can connect and process the PDF forms to extract the data using the Form Recognizer Python SDK.
 
-- Create a new [Jupyter notebook in VS Code](https://code.visualstudio.com/docs/python/jupyter-support#_create-or-open-a-jupyter-notebook?WT.mc_id=ca-14201-cassieb).
+- Create a new [Jupyter notebook in VS Code](https://code.visualstudio.com/docs/python/jupyter-support#_create-or-open-a-jupyter-notebook?WT.mc_id=aiml-14201-cassieb).
 
 - Install the Python SDK
 ```python
@@ -65,7 +65,7 @@ endpoint = "<your endpoint>"
 key = "<your key>"
 ```
 
-- We then use the `endpoint` and `key` to connect to the service and create the [FormRecongizerClient](https://docs.microsoft.com/python/api/azure-ai-formrecognizer/azure.ai.formrecognizer.aio.formrecognizerclient?WT.mc_id=ca-14201-cassieb)
+- We then use the `endpoint` and `key` to connect to the service and create the [FormRecongizerClient](https://docs.microsoft.com/python/api/azure-ai-formrecognizer/azure.ai.formrecognizer.aio.formrecognizerclient?WT.mc_id=aiml-14201-cassieb)
 ```python
 form_recognizer_client = FormRecognizerClient(endpoint, AzureKeyCredential(key))
 ```
@@ -105,7 +105,7 @@ def print_result(invoices, blob_name):
 ```
 ### Connect to Blob Storage
 
-- Now lets [connect to our blob storage containers](https://docs.microsoft.com/azure/storage/blobs/storage-quickstart-blobs-python?WT.mc_id=ca-14201-cassieb) and create the [BlobServiceClient](https://docs.microsoft.com/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?WT.mc_id=ca-14201-cassieb). We will use the client to connect to the `raw` and `processed` containers that we created earlier.
+- Now lets [connect to our blob storage containers](https://docs.microsoft.com/azure/storage/blobs/storage-quickstart-blobs-python?WT.mc_id=aiml-14201-cassieb) and create the [BlobServiceClient](https://docs.microsoft.com/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?WT.mc_id=aiml-14201-cassieb). We will use the client to connect to the `raw` and `processed` containers that we created earlier.
 
 ```python
 # Create the BlobServiceClient object which will be used to get the container_client
@@ -120,7 +120,7 @@ invoiceUrlBase = raw_container_client.primary_endpoint
 print(invoiceUrlBase)
 ```
 
-*HINT: If you get a "HttpResponseError: (InvalidImageURL) Image URL is badly formatted." error make sure the proper permissions to access the container are set. Learn more about Azure Storage Permissions [here](https://docs.microsoft.com/azure/storage/common/storage-auth?WT.mc_id=ca-14201-cassieb)*
+*HINT: If you get a "HttpResponseError: (InvalidImageURL) Image URL is badly formatted." error make sure the proper permissions to access the container are set. Learn more about Azure Storage Permissions [here](https://docs.microsoft.com/azure/storage/common/storage-auth?WT.mc_id=aiml-14201-cassieb)*
 
 
 ### Extract Data from PDFs
@@ -203,7 +203,7 @@ The `Apply to each` block should look something like this:
 - Save and Test the Flow
     - Once you have completed creating the flow save and test it out using the built in test features that are part of power automate.
 
-This prebuilt model again worked great on our invoice data. However if you have a more complex dataset, use the AI Builder to label and create a customized machine learning model for your specific dataset. Read more about how to do that [here](https://docs.microsoft.com/azure/cognitive-services/form-recognizer/tutorial-ai-builder?WT.mc_id=ca-14201-cassieb).
+This prebuilt model again worked great on our invoice data. However if you have a more complex dataset, use the AI Builder to label and create a customized machine learning model for your specific dataset. Read more about how to do that [here](https://docs.microsoft.com/azure/cognitive-services/form-recognizer/tutorial-ai-builder?WT.mc_id=aiml-14201-cassieb).
 
 ## Conclusion
 
@@ -212,8 +212,8 @@ We went over a fraction of the things that you can do with Form Recognizer so do
 ### Additional resources
 [New Form Recognizer Features](https://azure.microsoft.com/blog/new-features-for-form-recognizer-now-available/#:~:text=New%20features%20for%20Form%20Recognizer%20now%20available.%20Neta,tables%20from%20documents%20to%20accelerate%20their%20business%20processes.)
 
-[What is Form Recognizer?](https://docs.microsoft.com/azure/cognitive-services/form-recognizer/overview?WT.mc_id=ca-14201-cassieb)
+[What is Form Recognizer?](https://docs.microsoft.com/azure/cognitive-services/form-recognizer/overview?WT.mc_id=aiml-14201-cassieb)
 
-[Quickstart: Use the Form Recognizer client library or REST API](https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/quickstarts/client-library?tabs=preview%2Cv2-1&pivots=programming-language-python?WT.mc_id=ca-14201-cassieb)
+[Quickstart: Use the Form Recognizer client library or REST API](https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/quickstarts/client-library?tabs=preview%2Cv2-1&pivots=programming-language-python?WT.mc_id=aiml-14201-cassieb)
 
-[Tutorial: Create a form-processing app with AI Builder](https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/tutorial-ai-builder?WT.mc_id=ca-14201-cassieb)
+[Tutorial: Create a form-processing app with AI Builder](https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/tutorial-ai-builder?WT.mc_id=aiml-14201-cassieb)
