@@ -13,7 +13,7 @@ Power Automate Flow:
 
 ### Prerequisites for Python
 -	Azure Account [Sign up here!](https://azure.microsoft.com/free/?WT.mc_id=aiml-14201-cassieb)
--  [Anaconda]() and/or [VS Code]()
+-  [Anaconda](https://www.anaconda.com/products/individual) and/or [VS Code](https://code.visualstudio.com/Download?WT.mc_id=aiml-14201-cassieb)
 -  Basic programming knowledge
 
 ### Prerequisites for Power Automate
@@ -39,7 +39,7 @@ The result should look something like this:
 
 
 ### Create Notebook and Install Packages
-Now that we have our data stored in Azure Blob Storage we can connect and process the PDF forms to extract the data using the Form Recognizer Python SDK.
+Now that we have our data stored in Azure Blob Storage we can connect and process the PDF forms to extract the data using the Form Recognizer Python SDK. You can also use the Python SDK with local data if you are not using Azure Storage. This example will assume you are using Azure Storage.
 
 - Create a new [Jupyter notebook in VS Code](https://code.visualstudio.com/docs/python/jupyter-support#_create-or-open-a-jupyter-notebook?WT.mc_id=aiml-14201-cassieb).
 
@@ -111,10 +111,13 @@ def print_result(invoices, blob_name):
 # Create the BlobServiceClient object which will be used to get the container_client
 connect_str = "<Get connection string from the Azure Portal>"
 blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+
 # Container client for raw container.
 raw_container_client = blob_service_client.get_container_client("raw")
+
 # Container client for processed container
 processed_container_client = blob_service_client.get_container_client("processed")
+
 # Get base url for container.
 invoiceUrlBase = raw_container_client.primary_endpoint
 print(invoiceUrlBase)
@@ -130,18 +133,21 @@ We are ready to process the blobs now! Here we will call `list_blobs` to get a l
 ```python
 print("\nProcessing blobs...")
 
-# List the blobs in the container
 blob_list = raw_container_client.list_blobs()
 for blob in blob_list:
     invoiceUrl = f'{invoiceUrlBase}/{blob.name}'
     print(invoiceUrl)
     poller = form_recognizer_client.begin_recognize_invoices_from_url(invoiceUrl)
+
     # Get results
     invoices = poller.result()
+
     # Print results
     print_result(invoices, blob.name)
+
     # Copy blob to processed
-    processed_container_client.upload_blob(blob, blob.blob_type,    overwrite=True)
+    processed_container_client.upload_blob(blob, blob.blob_type, overwrite=True)
+
     # Delete blob from raw now that its processed
     raw_container_client.delete_blob(blob)
 ```
@@ -152,9 +158,9 @@ Each result should look similar to this for the above invoice example:
 
 The prebuilt invoices model worked great for our invoices so we don't need to train a customized Form Recognizer model to improve our results.  But what if we did and what if we didn't know how to code?! You can still leverage all this awesomeness in AI Builder with Power Automate without writing any code. We will take a look at this same example in Power Automate next.
 
-## Use Form Recognizer with AI Build in Power Automate
+## Use Form Recognizer with AI Builder in Power Automate
 
-You can achieve these same results using no code with Form Recognizer in AI Builder with Power Automate. Lets take a look at how we can do that!
+You can achieve these same results using no code with Form Recognizer in AI Builder with Power Automate. Lets take a look at how we can do that.
 
 ### Create a New Flow
 - Log in to [Power Automate](https://flow.microsoft.com/)
@@ -179,20 +185,20 @@ Your flow should look something like this:
 - Click `Control` then `Apply to each`
 - Select the textbox and a list of blob properties will appear. Select the `value` property
 - Next select `add action` from within the `Apply to each` Flow step.
-- `Get blob content` Flow step
+- Add the `Get blob content` step:
     - Search for `Azure Blob Storage` and select `Get blob content`
     - Click the textbox and select the `Path` property. This will get the `File content` that we will pass into the Form Recognizer.
-- `Process and save information from invoices` flow step
+- Add the `Process and save information from invoices` step:
     - Click the plus sign and then `add new action`
     - Search for `Process and save information from invoices`
     - Select the textbox and then the property `File Content` from the `Get blob content` section
-- `Copy Blob` Flow Step
+- Add the `Copy Blob` step:
     - Repeat the add action steps
     - Search for `Azure Blob Storage` and select `Copy Blob`
     - Select the `Source url` text box and select the `Path` property
     - Select the `Destination blob path` and put `/processed` for the processed container
     - Select `Overwrite?` dropdown and select `Yes` if you want the copied blob to overwrite blobs with the existing name.
-- `Delete Blob` Flow Step
+- Add the `Delete Blob` step:
     - Repeat the add action steps
     - Search for `Azure Blob Storage` and select `Delete Blob`
     - Select the `Blob` text box and select the `Path` property
@@ -207,7 +213,7 @@ This prebuilt model again worked great on our invoice data. However if you have 
 
 ## Conclusion
 
-We went over a fraction of the things that you can do with Form Recognizer so dont let the learning stop here! Check out the below highlights of new Form Recongizer features that were just announced and the additional doc links to dive deeper into what we did here!
+We went over a fraction of the things that you can do with Form Recognizer so don't let the learning stop here! Check out the below highlights of new Form Recongizer features that were just announced and the additional doc links to dive deeper into what we did here.
 
 ### Additional resources
 [New Form Recognizer Features](https://azure.microsoft.com/blog/new-features-for-form-recognizer-now-available/#:~:text=New%20features%20for%20Form%20Recognizer%20now%20available.%20Neta,tables%20from%20documents%20to%20accelerate%20their%20business%20processes.)
