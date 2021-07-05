@@ -24,7 +24,7 @@ Power Automate Flow:
 
 ### Create Services
 First lets create the Form Recognizer Cognitive Service.
--	Go to portal.azure.com to create the resource or click this [link](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesFormRecognizer).
+-	Go to portal.azure.com to create the resource or click this [link](https://ms.portal.azure.com/?WT.mc_id=aiml-0000-cassieb#create/Microsoft.CognitiveServicesFormRecognizer).
 
 Now lets create a storage account to store the PDF dataset we will be using in containers. We want two containers, one for the `processed` PDFs and one for the `raw` unprocessed PDF.
 -	Create an [Azure Storage Account](https://docs.microsoft.com/azure/storage/common/storage-account-create?WT.mc_id=aiml-14201-cassieb)
@@ -41,7 +41,7 @@ The result should look something like this:
 ### Create Notebook and Install Packages
 Now that we have our data stored in Azure Blob Storage we can connect and process the PDF forms to extract the data using the Form Recognizer Python SDK. You can also use the Python SDK with local data if you are not using Azure Storage. This example will assume you are using Azure Storage.
 
-- Create a new [Jupyter notebook in VS Code](https://code.visualstudio.com/docs/python/jupyter-support#_create-or-open-a-jupyter-notebook?WT.mc_id=aiml-14201-cassieb).
+- Create a new [Jupyter notebook in VS Code](https://code.visualstudio.com/docs/python/jupyter-support?WT.mc_id=aiml-0000-cassieb#_create-or-open-a-jupyter-notebook?WT.mc_id=aiml-14201-cassieb).
 
 - Install the Python SDK
 ```python
@@ -163,7 +163,7 @@ The prebuilt invoices model worked great for our invoices so we don't need to tr
 You can achieve these same results using no code with Form Recognizer in AI Builder with Power Automate. Lets take a look at how we can do that.
 
 ### Create a New Flow
-- Log in to [Power Automate](https://flow.microsoft.com/)
+- Log in to [Power Automate](https://flow.microsoft.com/?WT.mc_id=aiml-0000-cassieb)
 - Click `Create` then click `Instant Cloud Flow`. You can trigger Power Automate flows in a variety of ways so keep in mind that you may want to select a different trigger for you project.
 - Give the Flow a name and select the `Manually trigger a flow`.
 
@@ -216,10 +216,10 @@ This prebuilt model again worked great on our invoice data. However if you have 
 We went over a fraction of the things that you can do with Form Recognizer so don't let the learning stop here! Check out the below highlights of new Form Recongizer features that were just announced and the additional doc links to dive deeper into what we did here.
 
 ### Additional resources
-[New Form Recognizer Features](https://azure.microsoft.com/blog/new-features-for-form-recognizer-now-available/#:~:text=New%20features%20for%20Form%20Recognizer%20now%20available.%20Neta,tables%20from%20documents%20to%20accelerate%20their%20business%20processes.)
+[New Form Recognizer Features](https://azure.microsoft.com/blog/new-features-for-form-recognizer-now-available/?WT.mc_id=aiml-0000-cassieb#:~:text=New features for Form Recognizer now available. Neta,tables from documents to accelerate their business processes.)
 
 [What is Form Recognizer?](https://docs.microsoft.com/azure/cognitive-services/form-recognizer/overview?WT.mc_id=aiml-14201-cassieb)
 
-[Quickstart: Use the Form Recognizer client library or REST API](https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/quickstarts/client-library?tabs=preview%2Cv2-1&pivots=programming-language-python?WT.mc_id=aiml-14201-cassieb)
+[Quickstart: Use the Form Recognizer client library or REST API](https://docs.microsoft.com/azure/cognitive-services/form-recognizer/quickstarts/client-library?tabs=preview,v2-1&pivots=programming-language-python%3FWT.mc_id%3Daiml-14201-cassieb&WT.mc_id=aiml-0000-cassieb)
 
 [Tutorial: Create a form-processing app with AI Builder](https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/tutorial-ai-builder?WT.mc_id=aiml-14201-cassieb)
